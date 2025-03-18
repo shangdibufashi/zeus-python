@@ -1,0 +1,122 @@
+name: macOS-14
+on:
+  push:
+    branches:
+      # - test
+      - dev
+      - releases
+      - 'release-[0-9]+.*'
+    tags:
+      - '[0-9]+.*'
+  pull_request:
+    branches:
+      - dev
+      - releases
+      - 'release-[0-9]+.*'
+  workflow_dispatch:
+
+jobs:
+
+  armbuild:
+    runs-on: macos-14
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - python-arch: 'arm64'
+          macos-min-version: '14.0'
+          python-version: '3.8'
+          numpy-version: '1.24.4'
+        - python-arch: 'arm64'
+          macos-min-version: '14.0'
+          python-version: '3.9'
+          numpy-version: '2.0.*'
+        - python-arch: 'arm64'
+          macos-min-version: '14.0'
+          python-version: '3.10'
+          numpy-version: '2.0.*'
+        - python-arch: 'arm64'
+          macos-min-version: '14.0'
+          python-version: '3.10'
+          numpy-version: '1.22.4'
+        - python-arch: 'arm64'
+          macos-min-version: '14.0'
+          python-version: '3.11'
+          numpy-version: '2.0.*'
+        - python-arch: 'arm64'
+          macos-min-version: '14.0'
+          python-version: '3.12'
+          numpy-version: '2.0.*'
+        # - python-arch: 'arm64'
+        #   macos-min-version: '14.0'
+        #   python-version: '3.12'
+        #   numpy-version: '1.26.4'
+        - python-arch: 'arm64'
+          macos-min-version: '14.0'
+          python-version: '3.13'
+          numpy-version: '2.1.*'
+          
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with: 
+          fetch-tags: '0'
+          fetch-depth: '0'
+
+      - name: Install dependencies
+        run: |
+           date -u
+           mkdir build
+           date +%s > build/stamp
+           brew uninstall --ignore-dependencies libtiff
+           brew install imagemagick create-dmg libtiff gtk+3 gtkmm3 gtk-mac-integration adwaita-icon-theme libsigc++@2 little-cms2 libiptcdata fftw lensfun expat pkgconfig llvm shared-mime-info exiv2 jpeg-xl libomp automake libtool | tee -a depslog
+           date -u
+           echo "----====Pourage====----"
+           cat depslog | grep Pouring
+           zsh -c 'echo "Completed installation of dependencies in $(printf "%0.2f" $(($[$(date +%s)-$(cat build/stamp)]/$((60.))))) minutes"' >> $GITHUB_STEP_SUMMARY
+      
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python (macOS)
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.config.python-version }}
+
+      - name: Prepare Resources
+        run: |
+          set -x
+          wget -q https://github.com/shangdibufashi/rtx/releases/download/nightly-github-actions/Resources.zip -O resource.zip
+          unzip -q -o  resource.zip -d src
+          ls -alh src/
+
+      - name: Prepare Libs
+        run: |
+          set -x
+          wget -q https://github.com/shangdibufashi/rtx/releases/download/nightly-github-actions/macos14_release.zip -O rtx.zip
+          unzip -q rtx.zip 
+          cp -rf build/Release/MacOS/* src/rtx/
+          cp src/camconst.json src/rtx/
+          ls -alh src/rtx/
+          
+      - name: Configure build
+        working-directory: ./src
+        env:
+          MACOS_MIN_VERSION: ${{ matrix.config.macos-min-version }}
+          PYTHON_ARCH: ${{ matrix.config.python-arch }}
+          PYTHON_VERSION: ${{ matrix.config.python-version }}
+          NUMPY_VERSION: ${{ matrix.config.numpy-version }}
+        run: |
+          set -x
+          ./scripts/bdist_wheel.sh
+
+      - name: Publish artifacts
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
+        with:
+          tag_name: nightly-github-actions
+          files: |
+            src/dist/*.whl

@@ -1,0 +1,7 @@
+cython
+pybind11
+wheel
+delocate
+setuptools
+numpy
+opencv-python-headless

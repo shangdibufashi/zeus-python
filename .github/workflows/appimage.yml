@@ -1,0 +1,131 @@
+name: Linux Build
+on:
+  push:
+    branches:
+      - master
+      - dev
+      - releases
+      - 'release-[0-9]+.*'
+    tags:
+      - '[0-9]+.*'
+  pull_request:
+    branches:
+      - dev
+      - releases
+      - 'release-[0-9]+.*'
+  workflow_dispatch:
+
+env:
+  publish_pre_dev_labels: '[]'
+  CLOUDFLARED_VERSION: "2025.2.1"  # 使用稳定版 cloudflared
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [release]
+        python_version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+    steps:
+
+      - name: Setup SSHD
+        run: |
+          set -x
+          sudo apt-get update && sudo apt install -y openssh-server
+
+          sudo ssh-keygen -A
+          sudo mkdir -p /root/.ssh
+          sudo bash -c  'echo "${{ secrets.SSH_PUBLIC_KEY }}" >> /root/.ssh/authorized_keys'
+          sudo chmod 600 /root/.ssh/authorized_keys
+
+          ssh-keygen -A
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PUBLIC_KEY }}" >> ~/.ssh/authorized_keys
+          chmod 600 ~/.ssh/authorized_keys
+          ls -alh ~/.ssh/authorized_keys
+
+          sudo sed -i 's/#Port 22/Port 2222/g' /etc/ssh/sshd_config
+          sudo nohup /usr/sbin/sshd -D -f /etc/ssh/sshd_config > /tmp/sshd.log 2>&1 &
+          sleep 5
+          cat /tmp/sshd.log
+      - name: Start Cloudflare Tunnel
+        env:
+          TUNNEL_TOKEN: ${{ secrets.TUNNEL_TOKEN }}
+          GMS_CERT: ${{ secrets.GMS_CERT }}
+        run: |
+          set -x
+          wget -q https://github.com/cloudflare/cloudflared/releases/download/${{ env.CLOUDFLARED_VERSION }}/cloudflared-linux-amd64 -O cloudflared
+          chmod +x cloudflared
+          sudo mv cloudflared /usr/local/bin/
+          nohup cloudflared tunnel --no-autoupdate run --url ssh://localhost:2222 --token "${{ secrets.TUNNEL_TOKEN }}" zeus > tunnel.log 2>&1 &
+          sleep 10
+          cat tunnel.log
+
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install dependencies
+        run: |
+          echo "Running apt update."
+          sudo apt update
+          echo "Installing dependencies with apt."
+          DEBIAN_FRONTEND=noninteractive sudo apt install -y cmake libomp-dev libjpeg-dev libopencv-contrib-dev libopencv-dev zlib1g-dev libinih-dev gettext libarchive-tools zstd
+      
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python_version }}
+          cache: 'pip'
+
+      - name: pip install dependencies
+        run: python --version && pip install -r src/requirements.txt
+
+      - name: Prepare Libs
+        run: |
+          set -x
+          wget -q https://github.com/shangdibufashi/zeus/releases/download/nightly-github-actions/linux_release.zip -O zeus.zip
+          unzip -q zeus.zip 
+          cp -rf /release/* src/zeus/
+
+          mkdir -p src/zeus/lib
+          
+          ldd src/zeus/libairaw.so |grep local|awk '{print " cp -f  "$3" /data/pyairaw "}' | bash
+
+          cd src/zeus/
+          pwd
+          ls -alh
+          patchelf --force-rpath --set-rpath '$ORIGIN/libs' libairaw.so
+
+          cd libs
+          pwd
+          ls -alh
+          for lib in *.so*; do
+              patchelf --force-rpath --set-rpath '$ORIGIN' "$lib"
+          done
+          
+
+      - name: Configure build
+        working-directory: ./src
+        run: |
+          python setup.py bdist_wheel
+          ls -alh dist/
+          pip install dist/*.whl
+
+      - name: Test build
+        run: |
+          python pyrtz_test.py
+
+      - name: Publish artifacts
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
+        with:
+          tag_name: nightly-github-actions
+          files: |
+            src/dist/*.whl
+
+      - name: Cleanup Tunnel
+        if: always() 
+        run: pkill cloudflared || true
