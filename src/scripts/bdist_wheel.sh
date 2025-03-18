@@ -81,4 +81,4 @@ echo "Renamed $whl_file to $new_whl_file"
 
 pwd
 cd ..
-python pyrtz_test.py
+python zeus_test.py
