@@ -39,12 +39,6 @@ add_compile_options(-Wno-packed-non-pod)
 add_compile_options(-Wno-misleading-indentation)
 add_compile_options(-Wno-deprecated-declarations)
 
-# Set required C and C++ standards and check GCC version:
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-# message(STATUS "WARNING: gcc ${CMAKE_CXX_COMPILER_VERSION} is known to miscompile RawTherapee when using --ffp-contract=fast, forcing the option to be off")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffp-contract=off")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffp-contract=off")
 # We might want to build using the old C++ ABI, even when using a new GCC
 # version:
 # add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
@@ -55,20 +49,6 @@ set(PROC_TARGET_NUMBER
     0 CACHE STRING
     "Selected target processor from the list above (taken from ProcessorTargets.cmake)"
 )
-# Set special compilation flags for rtengine which get added to CMAKE_CXX_FLAGS:
-# Some Linux distros build with -O2 instead of -O3. We explicitly enable auto
-# vectorization by using -ftree-vectorize
-set(RTENGINE_CXX_FLAGS
-    "-ftree-vectorize"
-    CACHE STRING "Special compilation flags for RTEngine")
-# Stop compilation on typos such as std:swap (missing colon will be detected as
-# unused label):
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=unused-label")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=delete-incomplete")
-
-# Do net set math errno, as we never check its value.
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-math-errno")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-math-errno")
 
 # suppress warning https://github.com/Beep6581/RawTherapee/issues/6105
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-attributes")
@@ -78,10 +58,11 @@ set(EXTRA_LIB "Ws2_32")
 
 message(STATUS "current platform: ${CMAKE_SYSTEM_NAME} ")
 
-# find_package(OpenMP REQUIRED)
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+find_package(OpenCV REQUIRED)
+message(STATUS "OpenCV_INCLUDE_DIRS: ${OpenCV_INCLUDE_DIRS}")
+message(STATUS "OpenCV_LIBS: ${OpenCV_LIBS}")
 
+# 查找依赖库
 # find_package(PkgConfig)
 
 
@@ -117,19 +98,15 @@ set_target_properties(zeus PROPERTIES
 
 # 包含目录
 target_include_directories(zeus PRIVATE
-    # ${Python_INCLUDE_DIRS}
-    # ${pybind11_INCLUDE_DIRS}
+    #${Python_INCLUDE_DIRS}
+    #${pybind11_INCLUDE_DIRS}
+    ${OpenCV_INCLUDE_DIRS}
 )
 
 # 链接库配置
 target_link_libraries(zeus PRIVATE
-    ${PYTHON_LIBRARY_FILE}
-    ${Python_LIBRARIES}
+    #${PYTHON_LIBRARY_FILE}
+    #${Python_LIBRARIES}
+    ${OpenCV_LIBS}
     ${CMAKE_SOURCE_DIR}/zeus/libairaw.dll.a
 )
-
-# MinGW特殊配置
-# target_link_libraries(zeus PRIVATE gcc mingwex msvcrt)
-# add_compile_options(-Wa,-mbig-obj)
-# add_link_options(-static-libgcc -static-libstdc++)
-

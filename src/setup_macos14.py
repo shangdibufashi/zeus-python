@@ -22,6 +22,9 @@ elif arch == 'x86_64':
 else:
     raise ValueError(f"不支持的架构: {arch}")
 
+assert os.path.exists(opencv_include), f"OpenCV 头文件路径不存在: {opencv_include}"
+assert os.path.exists(opencv_lib), f"OpenCV 库文件路径不存在: {opencv_lib}"
+
 # 获取 pybind11 的 include 路径
 class get_pybind_include(object):
     def __init__(self, user=False):
