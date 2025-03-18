@@ -137,7 +137,7 @@ jobs:
         run: |
           gh release upload nightly-github-actions src/dist/*.whl --clobber
         env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
           
       - name: Cleanup Tunnel
         if: always() 
