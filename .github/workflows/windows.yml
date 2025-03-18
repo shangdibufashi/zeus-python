@@ -2,7 +2,7 @@ name: Windows Build
 on:
   push:
     branches:
-      # - master
+      - master
       - dev
       - releases
       - 'release-[0-9]+.*'
@@ -54,13 +54,13 @@ jobs:
             wget
             mingw-w64-x86_64-editrights
             mingw-w64-x86_64-clang
+            mingw-w64-x86_64-opencv
           pacboy: |
             cc:p
             pkgconf:p
             cmake:p
             autotools:p
             ninja:p
-            opencv:p
             libjxl:p
 
 
@@ -85,6 +85,8 @@ jobs:
           cp -rf ./release/* src/zeus/
           ls -alh src/zeus/
           
+          nm "./src/zeus/libairaw.dll" | grep autoBrightnessAndContrast
+          nm "./src/zeus/libairaw.dll.a" | grep autoBrightnessAndContrast
 
       - name: Configure check
         working-directory: ./src

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.31)
-project(zeus_ext LANGUAGES CXX)
+project(zeus LANGUAGES CXX)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -61,10 +61,8 @@ message(STATUS "current platform: ${CMAKE_SYSTEM_NAME} ")
 find_package(OpenCV REQUIRED)
 message(STATUS "OpenCV_INCLUDE_DIRS: ${OpenCV_INCLUDE_DIRS}")
 message(STATUS "OpenCV_LIBS: ${OpenCV_LIBS}")
-
-# 查找依赖库
-# find_package(PkgConfig)
-
+set(OpenCV_LIBS opencv_core opencv_imgcodecs)
+message(STATUS "OpenCV_LIBS: ${OpenCV_LIBS}")
 
 # 查找Python依赖
 message(STATUS "Python root: ${Python_EXECUTABLE}")
@@ -74,13 +72,12 @@ message(STATUS "Python include dir: ${PYTHON_INCLUDE_DIR}")
 message(STATUS "Python libraries: ${PYTHON_LIBRARY}")
 message(STATUS "Python lib file: ${PYTHON_LIBRARY_FILE}")
 message(STATUS "Python root: ${Python_ROOT_DIR}")
-include_directories("$PYTHON_INCLUDE_DIR" "${PYTHON_INCLUDE_DIR}" "zeus")
-link_directories("PYTHON_LIBRARY" "${PYTHON_LIBRARY}" "zeus")
+include_directories("$PYTHON_INCLUDE_DIR" "${PYTHON_INCLUDE_DIR}" "${CMAKE_SOURCE_DIR}/zeus")
+link_directories("PYTHON_LIBRARY" "${PYTHON_LIBRARY}" "${CMAKE_SOURCE_DIR}/zeus")
 
 list(APPEND CMAKE_PREFIX_PATH "${Python_ROOT_DIR}/Lib/site-packages/pybind11/share/cmake/pybind11/")
 message(STATUS "CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
 
-# find_package(pybind11 REQUIRED CONFIG COMPONENTS numpy OPTIONAL_COMPONENTS stl)
 find_package(pybind11 REQUIRED) 
 message(STATUS "pybind11_INCLUDE_DIRS: ${pybind11_INCLUDE_DIRS}")
 
