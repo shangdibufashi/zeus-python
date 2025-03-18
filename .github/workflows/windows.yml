@@ -115,6 +115,9 @@ jobs:
           rm -rf build;
           cmake -G "MinGW Makefiles"  \
                   -DCMAKE_GNUtoMS=ON \
+                  -DCMAKE_MAKE_PROGRAM=mingw32-make \
+                  -DCMAKE_C_COMPILER=$(cygpath -w /mingw64/bin/clang) \
+                  -DCMAKE_CXX_COMPILER=$(cygpath -w /mingw64/bin/clang++)  \
                   -DCMAKE_CXX_FLAGS_RELEASE="-O0" \
                   -DPython_ROOT_DIR="$Python_ROOT_DIR" \
                   -DPYTHON_LIBRARY_FILE="$PYTHON_LIBRARY_FILE" \

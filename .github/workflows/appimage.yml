@@ -26,7 +26,7 @@ jobs:
       fail-fast: false
       matrix:
         build_type: [release]
-        python_version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        python_version: ['3.8'] # ['3.8', '3.9', '3.10', '3.11', '3.12']
     steps:
 
       - name: Setup SSHD
@@ -81,6 +81,13 @@ jobs:
 
       - name: pip install dependencies
         run: python --version && pip install -r src/requirements.txt
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        with:
+          install-dependencies: true
+          limit-access-to-actor: true
+          detached: false
 
       - name: Prepare Libs
         run: |
