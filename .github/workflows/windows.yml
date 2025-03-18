@@ -2,7 +2,6 @@ name: Windows Build
 on:
   push:
     branches:
-      # - test
       - master
       - dev
       - releases
@@ -91,13 +90,16 @@ jobs:
         working-directory: ./src
         run: |
           set -x
-
-          mkdir -p cmake_build
-          cd cmake_build
           ls -alh $Python_ROOT_DIR/libs/
           ls -alh $Python_ROOT_DIR/lib/site-packages/pybind11/share/cmake/pybind11/
           pwd
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        with:
+          install-dependencies: true
+          limit-access-to-actor: true
+          detached: false
 
       - name: CMake build
         working-directory: ./src

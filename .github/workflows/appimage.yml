@@ -2,7 +2,7 @@ name: Linux Build
 on:
   push:
     branches:
-      # - master
+      - master
       - dev
       - releases
       - 'release-[0-9]+.*'
@@ -82,23 +82,23 @@ jobs:
       - name: pip install dependencies
         run: python --version && pip install -r src/requirements.txt
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        with:
-          install-dependencies: true
-          limit-access-to-actor: true
-          detached: false
+      # - name: Setup tmate session
+      #   uses: mxschmitt/action-tmate@v3
+      #   with:
+      #     install-dependencies: true
+      #     limit-access-to-actor: true
+      #     detached: false
 
       - name: Prepare Libs
         run: |
           set -x
           wget -q https://github.com/shangdibufashi/zeus/releases/download/nightly-github-actions/linux_release.zip -O zeus.zip
           unzip -q zeus.zip 
-          cp -rf /release/* src/zeus/
+          cp -rf ./release/* src/zeus/
 
-          mkdir -p src/zeus/lib
+          mkdir -p src/zeus/libs
           
-          ldd src/zeus/libairaw.so |grep local|awk '{print " cp -f  "$3" /data/pyairaw "}' | bash
+          ldd src/zeus/libairaw.so |grep '/lib/' |awk '{print " cp -f  "$3" src/zeus/libs "}' | bash
 
           cd src/zeus/
           pwd
@@ -122,17 +122,23 @@ jobs:
 
       - name: Test build
         run: |
-          python pyrtz_test.py
+          python zeus_test.py
 
-      - name: Publish artifacts
-        uses: softprops/action-gh-release@v2
+      # - name: Publish artifacts
+      #   uses: softprops/action-gh-release@v2
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
+      #   with:
+      #     tag_name: nightly-github-actions
+      #     files: |
+      #       src/dist/*.whl
+
+      - name: Upload wheels to release
+        run: |
+          gh release upload nightly-github-actions src/dist/*.whl --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
-        with:
-          tag_name: nightly-github-actions
-          files: |
-            src/dist/*.whl
-
+          
       - name: Cleanup Tunnel
         if: always() 
         run: pkill cloudflared || true

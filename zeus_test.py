@@ -1,4 +1,4 @@
-import pyairaw.pyairaw as pyairaw
+import zeus.zeus as pyairaw
 import cv2
 import numpy as np
 import logging
@@ -35,8 +35,8 @@ def assert_exists(f):
     
 @timer_decorator
 def test_cv2_img_concat():
-    imgfile = f'{pwd}/assets/portrait.jpg'
-    dstfile= f'{pwd}/assets/portrait_concat_result.jpg'
+    imgfile = f'{pwd}/src/assets/portrait.jpg'
+    dstfile= f'{pwd}/src/assets/portrait_concat_result.jpg'
     assert_exists(imgfile)
     img1 = cv2.imread(imgfile)
     img2 = cv2.flip(cv2.imread(imgfile), 1)
@@ -73,9 +73,9 @@ def test_apply_3dlut_file():
     mode_cubic,
     mode_tetrahedral
     """
-    imgfile = f'{pwd}/assets/portrait.jpg'
-    dstfile = f'{pwd}/assets/portrait_lut_file_mode_cubic.jpg'
-    lutfile = f'{pwd}/assets/skin_red.png'
+    imgfile = f'{pwd}/src/assets/portrait.jpg'
+    dstfile = f'{pwd}/src/assets/portrait_lut_file_mode_cubic.jpg'
+    lutfile = f'{pwd}/src/assets/skin_red.png'
     assert_exists(imgfile)
     assert_exists(lutfile)
 
@@ -94,9 +94,9 @@ def test_apply_3dlut():
     mode_cubic,
     mode_tetrahedral
     """
-    imgfile = f'{pwd}/assets/portrait.jpg'
-    dstfile = f'{pwd}/assets/portrait_lut_mode_linear.jpg'
-    lutfile = f'{pwd}/assets/skin_red.png'
+    imgfile = f'{pwd}/src/assets/portrait.jpg'
+    dstfile = f'{pwd}/src/assets/portrait_lut_mode_linear.jpg'
+    lutfile = f'{pwd}/src/assets/skin_red.png'
     assert_exists(imgfile)
     assert_exists(lutfile)
 
@@ -119,9 +119,9 @@ def test_apply_3dlut_16bit():
     mode_cubic,
     mode_tetrahedral
     """
-    imgfile = f'{pwd}/assets/portrait.jpg'
-    dstfile = f'{pwd}/assets/portrait_lut_mode_linear.jpg'
-    lutfile = f'{pwd}/assets/skin_red.png'
+    imgfile = f'{pwd}/src/assets/portrait.jpg'
+    dstfile = f'{pwd}/src/assets/portrait_lut_mode_linear.jpg'
+    lutfile = f'{pwd}/src/assets/skin_red.png'
     assert_exists(imgfile)
     assert_exists(lutfile)
 
@@ -141,9 +141,9 @@ def test_apply_3dlut_16bit():
     
 @timer_decorator
 def test_apply_3d_lut_post_file():
-    imgfile = f'{pwd}/assets/portrait.jpg'
-    dstfile = f'{pwd}/assets/portrait_lut_file.jpg'
-    lutfile = f'{pwd}/assets/skin_red.png'
+    imgfile = f'{pwd}/src/assets/portrait.jpg'
+    dstfile = f'{pwd}/src/assets/portrait_lut_file.jpg'
+    lutfile = f'{pwd}/src/assets/skin_red.png'
     assert_exists(imgfile)
     assert_exists(lutfile)
 
@@ -156,9 +156,9 @@ def test_apply_3d_lut_post_file():
 
 @timer_decorator
 def test_apply_3d_lut_post():
-    imgfile = f'{pwd}/assets/portrait.jpg'
-    dstfile = f'{pwd}/assets/portrait_lut_post.jpg'
-    lutfile = f'{pwd}/assets/skin_red.png'
+    imgfile = f'{pwd}/src/assets/portrait.jpg'
+    dstfile = f'{pwd}/src/assets/portrait_lut_post.jpg'
+    lutfile = f'{pwd}/src/assets/skin_red.png'
     assert_exists(imgfile)
     assert_exists(lutfile)
 
@@ -175,9 +175,9 @@ def test_apply_3d_lut_post():
 
 @timer_decorator
 def test_apply_3d_lut_post_16bit():
-    imgfile = f'{pwd}/assets/portrait.jpg'
-    dstfile = f'{pwd}/assets/portrait_lut_post.jpg'
-    lutfile = f'{pwd}/assets/skin_red.png'
+    imgfile = f'{pwd}/src/assets/portrait.jpg'
+    dstfile = f'{pwd}/src/assets/portrait_lut_post.jpg'
+    lutfile = f'{pwd}/src/assets/skin_red.png'
     assert_exists(imgfile)
     assert_exists(lutfile)
 
