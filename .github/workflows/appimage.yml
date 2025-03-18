@@ -124,20 +124,16 @@ jobs:
         run: |
           python zeus_test.py
 
-      # - name: Publish artifacts
-      #   uses: softprops/action-gh-release@v2
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
-      #   with:
-      #     tag_name: nightly-github-actions
-      #     files: |
-      #       src/dist/*.whl
-
-      - name: Upload wheels to release
-        run: |
-          gh release upload nightly-github-actions src/dist/*.whl --clobber
+      - name: Publish artifacts
+        uses: softprops/action-gh-release@v2
         env:
-          GH_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
+        with:
+          tag_name: nightly-github-actions
+          overwrite: true
+          files: |
+            src/dist/*.whl
+
           
       - name: Cleanup Tunnel
         if: always() 

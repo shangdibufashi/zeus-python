@@ -30,8 +30,8 @@ endif ()
 
 # 
 # 如何在mingw64中的clang上面编译出兼容MSVC的动态库?
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -fPIC")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+#set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -fPIC")
 # option(WITH_BENCHMARK "Build with benchmark code" OFF) #for RT
 # add_compile_options(-Wno-vla-cxx-extension)
 add_compile_options(-Wno-constant-logical-operand)
