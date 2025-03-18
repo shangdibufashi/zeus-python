@@ -19,7 +19,6 @@ env:
   publish_pre_dev_labels: '[]'
   CLOUDFLARED_VERSION: "2025.2.1"
 
-
 jobs:
   win-build:
     runs-on: windows-latest
@@ -60,31 +59,6 @@ jobs:
             libjxl:p
             make:p
 
-      # - name: Install dependencies
-      #   uses: msys2/setup-msys2@v2
-      #   with:
-      #     location: C:\msys2
-      #     update: true
-      #     msystem: MINGW64
-      #     install: |
-      #       git
-      #       intltool
-      #       zip
-      #       unzip
-      #       openssh
-      #       wget
-      #       mingw-w64-x86_64-editrights
-      #       mingw-w64-x86_64-clang
-      #       mingw-w64-x86_64-opencv
-      #     pacboy: |
-      #       cc:p
-      #       pkgconf:p
-      #       cmake:p
-      #       autotools:p
-      #       ninja:p
-      #       libjxl:p
-
-
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python_version }}
@@ -109,20 +83,12 @@ jobs:
           nm "./src/zeus/libairaw.dll" | grep autoBrightnessAndContrast
           nm "./src/zeus/libairaw.dll.a" | grep autoBrightnessAndContrast
 
-      - name: Configure check
-        working-directory: ./src
-        run: |
-          set -x
-          ls -alh $Python_ROOT_DIR/libs/
-          ls -alh $Python_ROOT_DIR/lib/site-packages/pybind11/share/cmake/pybind11/
-          pwd
-
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        with:
-          install-dependencies: true
-          limit-access-to-actor: true
-          detached: false
+      # - name: Setup tmate session
+      #   uses: mxschmitt/action-tmate@v3
+      #   with:
+      #     install-dependencies: true
+      #     limit-access-to-actor: true
+      #     detached: false
 
       - name: CMake build
         working-directory: ./src
@@ -151,22 +117,6 @@ jobs:
                   -S . -B build
           cmake --build build --verbose
           objdump -p   build/zeus.pyd  |grep dll
-
-          # rm -rf build;
-          # cmake -G "MinGW Makefiles"  \
-          #         -DCMAKE_GNUtoMS=ON \
-          #         -DCMAKE_C_COMPILER=clang \
-          #         -DCMAKE_CXX_COMPILER=clang++  \
-          #         -DCMAKE_CXX_FLAGS_RELEASE="-O0" \
-          #         -DPython_ROOT_DIR="$Python_ROOT_DIR" \
-          #         -DPYTHON_LIBRARY_FILE="$PYTHON_LIBRARY_FILE" \
-          #         -DPYTHON_INCLUDE_DIR="$PYTHON_INCLUDE_DIR" \
-          #         -DPYTHON_LIBRARY="$PYTHON_LIBRARY" \
-          #         -DPython_EXECUTABLE="$Python_EXECUTABLE" \
-          #         -DCMAKE_BUILD_TYPE=RELEASE \
-          #         -S . -B build
-          # cmake --build build --verbose
-          # objdump -p   build/zeus.pyd  |grep dll
           
       - name: Prepare whl file
         working-directory: ./src
@@ -183,7 +133,7 @@ jobs:
           "$Python_ROOT_DIR"/python.exe \
               ./find_copy_dlls.py \
               --target_dir ./zeus/ \
-              --initial_dlls zeus/zeus.pyd
+              --initial_dlls zeus/zeus.pyd zeus/libairaw.dll
 
       - name: build whl
         working-directory: ./src
@@ -196,7 +146,7 @@ jobs:
           "$Python_ROOT_DIR"/python.exe setup_win10.py bdist_wheel --plat-name win_amd64 --python-tag=$pversion >> build.log 2>&1
           cat build.log
           ls -alh dist/
-          "$Python_ROOT_DIR"/python.exe -m pip install dist/*.whl
+          "$Python_ROOT_DIR"/python.exe -m pip install dist/*.whl --force-reinstall
 
       - name: Test build
         run: |
