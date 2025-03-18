@@ -48,6 +48,8 @@ jobs:
             git
             intltool
             zip
+            unzip
+            wget
           pacboy: |
             cc:p
             pkgconf:p
@@ -171,9 +173,9 @@ jobs:
         run: |
           set -x
           mv zeus zeus_bak
-          cp -rf zeus_bak/* C:/msys2/msys64/mingw64/bin/
 
           mkdir -p zeus
+          cp -rf zeus_bak/*.dll ./zeus/
           cp -rf zeus_bak/*.py ./zeus/
           cp -f build/zeus.pyd ./zeus/
           ls -alh zeus/
