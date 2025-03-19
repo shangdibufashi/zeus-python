@@ -152,11 +152,15 @@ jobs:
         run: |
           "$Python_ROOT_DIR"/python.exe zeus_test.py
 
+      - name: date
+        id: date
+        run: echo "date=$(date +%Y%m%d)" >> $GITHUB_OUTPUT
+
       - name: Publish artifacts
         uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
         with:
-          tag_name: nightly-github-actions
+          tag_name: nightly-${{ steps.date.outputs.date }}
           files: |
             src/dist/*.whl
