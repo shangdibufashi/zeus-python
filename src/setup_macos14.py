@@ -9,12 +9,14 @@ pwd = os.path.abspath(os.path.dirname(__file__))
 
 # 检测架构，默认为 x86_64
 arch = os.environ.get('PYTHON_ARCH', 'x86_64')
+macos_ver = os.environ.get('MACOS_MIN_VERSION', '14.0')
+macos_ver = macos_ver.replace('.', '_')
 
 # 根据架构设置 OpenCV 路径
 if arch == 'arm64':
     opencv_include = '/opt/homebrew/include/opencv4'
     opencv_lib = '/opt/homebrew/lib'
-    platform_name = 'macosx_14_0_arm64'
+    platform_name = f'macosx_{macos_ver}_arm64'
 elif arch == 'x86_64':
     opencv_include = '/usr/local/include/opencv4'
     opencv_lib = '/usr/local/lib'
